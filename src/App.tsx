@@ -6,6 +6,17 @@ import CreateSermon from './CreateSermon';
 import { Link, Route, BrowserRouter as Router } from 'react-router-dom';
 import SeriesList from './components/SeriesList';
 
+var sermon_api_base = "http://localhost:4000"
+if (process.env.SERMON_API_BASE) {
+  sermon_api_base = process.env.SERMON_API_BASE
+}
+
+const sermonAPIURL = sermon_api_base + "/sermons";
+const seriesAPIURL = sermon_api_base + "/series";
+const speakersAPIURL = sermon_api_base + "/speakers";
+const eventsAPIURL = sermon_api_base + "/events";
+const uploadAPIURL = sermon_api_base + "/uploadurl";
+
 class App extends Component {
   render() {
     return (
@@ -18,9 +29,9 @@ class App extends Component {
         </header>
         <main>
           
-            <Route path="/" exact={true} component={() => <SermonList sermonAPIURL="http://localhost:4000/sermons"></SermonList>}  />
-            <Route path="/series" exact={true} component={() => <SeriesList sermonAPIURL="http://localhost:4000/series"></SeriesList>}  />
-            <Route path="/create" exact={true} component={() => <CreateSermon sermonAPIURL="http://localhost:4000/sermons" seriesAPIURI="http://localhost:4000/series" speakersAPIURI="http://localhost:4000/speakers" eventsAPIURL="http://localhost:4000/events" sermonUploadUrlAPIURL="http://localhost:4000/uploadurl"></CreateSermon>}  />
+            <Route path="/" exact={true} component={() => <SermonList sermonAPIURL={sermonAPIURL}></SermonList>}  />
+            <Route path="/series" exact={true} component={() => <SeriesList sermonAPIURL={sermonAPIURL}></SeriesList>}  />
+            <Route path="/create" exact={true} component={() => <CreateSermon sermonAPIURL={sermonAPIURL} seriesAPIURI={seriesAPIURL} speakersAPIURI={speakersAPIURL} eventsAPIURL={eventsAPIURL} sermonUploadUrlAPIURL={uploadAPIURL}></CreateSermon>}  />
           
         </main>
       </div>
