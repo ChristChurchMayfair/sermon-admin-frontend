@@ -7,8 +7,8 @@ import { Link, Route, BrowserRouter as Router } from 'react-router-dom';
 import SeriesList from './components/SeriesList';
 
 var sermon_api_base = "http://localhost:4000"
-if (process.env.SERMON_API_BASE) {
-  sermon_api_base = process.env.SERMON_API_BASE
+if (process.env.REACT_APP_SERMON_API_BASE) {
+  sermon_api_base = process.env.REACT_APP_SERMON_API_BASE
 }
 
 const sermonAPIURL = sermon_api_base + "/sermons";
