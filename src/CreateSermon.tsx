@@ -19,6 +19,7 @@ type Props = {
     speakersAPIURI: string
     eventsAPIURL: string
     sermonUploadUrlAPIURL: string
+    getGithubToken: () => string | undefined
 };
 type State = {
     serieses: Series[]
@@ -205,9 +206,6 @@ class CreateSermon extends Component<Props, State> {
                     <select name="eventId" id="event" onChange={e => this.setState({...this.state, [e.currentTarget.name]: e.currentTarget.value})}>
                         {eventOptionElements}
                     </select>
-
-                    <label>Password:</label>
-                    <input name="password" id="password" type="password" onChange={e => this.setState({...this.state, [e.currentTarget.name]: e.currentTarget.value})}/>
 
                     <input type="file"
                         id="file" name="file"
