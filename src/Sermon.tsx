@@ -19,8 +19,8 @@ class SermonView extends Component<Props, State> {
                 <div>{this.props.sermon.speakers[0].name}</div>
                 <div>{this.props.sermon.event.name}</div>
                 <div>{this.props.sermon.series.name}</div>
-                <div><a href={this.props.sermon.url}>Download</a></div>
-                <div>{this.props.sermon.duration} seconds</div>
+                <div><a href={this.props.sermon.url}>⬇️</a></div>
+                <div>{this.props.sermon.duration}</div>
                 <div>{this.props.sermon.preachedAt}</div>
             </div>
         )

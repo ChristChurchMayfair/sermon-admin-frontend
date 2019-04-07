@@ -9,12 +9,13 @@ type Props = {
 type State = {
     serieses: Series[]
     loading: boolean
+    error: boolean
 }
 
 class SeriesList extends Component<Props,State> {
     constructor(props: Props) {
         super(props)
-        this.state = {serieses: [], loading: false}
+        this.state = {serieses: [], loading: false, error: false}
     }
 
     componentDidMount() {
@@ -23,17 +24,23 @@ class SeriesList extends Component<Props,State> {
           .then(res => {
             const serieses = res.data;
             this.setState({ serieses: serieses, loading: false });
+          }).catch(error => {
+            this.setState({error: true})
           })
         }
 
     render() {
 
         const seriesRender = this.state.serieses.map(series =>
-            <SeriesView series={series}/>
+            <SeriesView key={series.id} series={series}/>
             )
 
+        if (this.state.error) {
+            return(<div>Error Loading Serieses</div>)
+        }
+
         if (this.state.loading) {
-            return(<div>LOADING</div>)
+            return(<div>Loading Serieses</div>)
         }
 
         return(

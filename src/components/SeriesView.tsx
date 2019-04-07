@@ -13,7 +13,7 @@ class SeriesView extends Component<Props, State> {
 
     render() {
         return(
-            <div className="series">
+            <div key={this.props.series.id} className="series">
                 <div>{this.props.series.name}</div>
                 <div>{this.props.series.subtitle}</div>
                 <div>{this.props.series.image3x2url}</div>

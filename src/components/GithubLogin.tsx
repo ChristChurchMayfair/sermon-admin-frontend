@@ -65,10 +65,9 @@ class GithubLogin extends Component<Props,State> {
     render() {
         return(
             <div>
-            <a onClick={this.openPopup}>
-            Login using Github
+            <a href="#" onClick={this.openPopup}>
+            Login
             </a>
-            <div>{this.state.url || "no url"}</div>
             </div>
         )
     }

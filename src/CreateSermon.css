@@ -1,0 +1,5 @@
+.createsermon form div{
+    display: grid;
+    grid-template-columns: 1fr 5fr;
+    padding-bottom: var(--general-padding);
+}

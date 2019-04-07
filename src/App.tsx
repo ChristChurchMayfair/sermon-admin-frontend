@@ -5,10 +5,7 @@ import CreateSermon from './CreateSermon';
 import { Link, Route, BrowserRouter as Router } from 'react-router-dom';
 import SeriesList from './components/SeriesList';
 import GithubLogin from './components/GithubLogin';
-import GithubLoginCallBack from './components/GithubLoginCallBack';
-import { checkPropTypes } from 'prop-types';
 import axios from 'axios';
-import { timingSafeEqual } from 'crypto';
 import GithubUserInfo from './components/GithubUserInfo';
 
 
@@ -77,18 +74,26 @@ class App extends Component<Props,State> {
       <Router>
       <div className="App">
         <header className="App-header">
-        <GithubUserInfo githubToken={this.getGithubToken}></GithubUserInfo>
-        <Link to="/">Home</Link>
-        <Link to="/create">Upload a Sermon</Link>
-        <Link to="/series">Show Series List</Link>
-        <GithubLogin onCode={this.onCode} onClose={onClose} height={500} width={500} client_id="13781417cd1a751db388" allow_signup={false} scope="user,read:org"></GithubLogin>
+        <img id="ccm-logo" src="/assets/ccm-logo-full.svg"></img>
+        <div className="menu">
+        <Link to="/">Sermons</Link>
+        <Link to="/create">Upload</Link>
+        <Link to="/series">Series</Link>
+        <Link to="/events">Speakers</Link>
+        <Link to="/events">Events</Link>
+        </div>
+        <div className="github login"><GithubLogin onCode={this.onCode} onClose={onClose} height={500} width={500} client_id="13781417cd1a751db388" allow_signup={false} scope="user,read:org"></GithubLogin></div>
         </header>
+        <div className="github state"><GithubUserInfo githubToken={this.getGithubToken}></GithubUserInfo></div>
         <main>
-          
             <Route path="/" exact={true} component={() => <SermonList sermonAPIURL={sermonAPIURL}></SermonList>}  />
             <Route path="/series" exact={true} component={() => <SeriesList sermonAPIURL={sermonAPIURL}></SeriesList>}  />
             <Route path="/create" exact={true} component={() => <CreateSermon getGithubToken={this.getGithubToken} sermonAPIURL={sermonAPIURL} seriesAPIURI={seriesAPIURL} speakersAPIURI={speakersAPIURL} eventsAPIURL={eventsAPIURL} sermonUploadUrlAPIURL={uploadAPIURL}></CreateSermon>}  />
         </main>
+        <footer>
+          <div>The code for this app lives in the <a href="https://github.com/ChristChurchMayfair">CCM Github Organisation</a>.</div>
+          <div>If you are having problems or want to offer feedback contact <a href="mailto:tom@christchurchmayfair.org">Tom Duckering</a>.</div>
+        </footer>
       </div>
       </Router>
     );

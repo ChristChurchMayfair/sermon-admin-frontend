@@ -64,12 +64,16 @@ class GithubUserInfo extends Component<Props,State> {
             canUpload = "Yes"
         }
 
-        return(
-            <div>
-                <div>{this.state.user && this.state.user.login || "not logged in"}</div>
-                <div>Can Upload? {canUpload}</div>
-            </div>
-        )
+        if (this.state.user) {
+            return(
+                <div>
+                    <div>{this.state.user && this.state.user.login || "not logged in"}</div>
+                    <div>Can Upload? {canUpload}</div>
+                </div>
+            )
+        } else {
+            return(<div></div>);
+        }
     }
 
 }
