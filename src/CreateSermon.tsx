@@ -5,13 +5,47 @@ import { isUndefined } from 'util';
 import './CreateSermon.css';
 
 enum UploadState {
-    ErrorLoadingFormData,
-    FormNotComplete,
-    FormComplete,
+    NotStarted,
     FetchingPresignedUrl,
     UploadingFile,
     CreatingSermon,
     Done
+}
+
+export type SermonForm = {
+    name?: string
+    speakerId?: string
+    passage?: string
+    eventId?: string
+    seriesId?: string
+    file?: File
+    date?: string
+    time?: string
+}
+
+export function isFormComplete(form: SermonForm): boolean {
+    const isFormIncomplete = isUndefined(form.name) || 
+        isUndefined(form.eventId) || 
+        isUndefined(form.passage) || 
+        isUndefined(form.speakerId) ||
+        isUndefined(form.seriesId) ||
+        isUndefined(form.eventId) ||
+        isUndefined(form.file);
+    if (isFormIncomplete) {
+        return !isFormComplete;
+    }
+
+    var dateRegex = /^\d{1,2}\/\d{1,2}\/\d\d\d\d$/;
+    if (form.date && ! dateRegex.test(form.date)) {
+        return false
+    }
+
+    var timeRegex = /^\d\d:\d\d$/;
+    if (form.time && ! timeRegex.test(form.time)) {
+        return false
+    }
+
+    return true
 }
 
 type Props = {
@@ -22,6 +56,7 @@ type Props = {
     sermonUploadUrlAPIURL: string
     getGithubToken: () => string | undefined
 };
+
 type State = {
     serieses: Series[]
     speakers: Speaker[]
@@ -29,15 +64,11 @@ type State = {
     loadingSeries: boolean
     loadingSpeakers: boolean
     loadingEvents: boolean
+    errorLoadingFormData: boolean
 
     state: UploadState
 
-    name?: string
-    speakerId?: string
-    passage?: string
-    eventId?: string
-    seriesId?: string
-    file?: File
+    formData: SermonForm
 
     signedUploadURL?: string
 }
@@ -52,13 +83,15 @@ class CreateSermon extends Component<Props, State> {
     constructor(props: Props) {
         super(props);
         this.state = {
+            formData: {},
             serieses: [], 
             speakers: [], 
             events: [],
             loadingSeries: false, 
             loadingSpeakers: false,
             loadingEvents: false,
-            state: UploadState.FormNotComplete,
+            state: UploadState.NotStarted,
+            errorLoadingFormData: false
 
             // name: "None",
             // speakerId: "None",
@@ -68,8 +101,8 @@ class CreateSermon extends Component<Props, State> {
         this.handleSubmit = this.handleSubmit.bind(this);
         this.uploadSermon = this.uploadSermon.bind(this);
         this.createSermon = this.createSermon.bind(this);
-        this.isFormComplete = this.isFormComplete.bind(this);
         this.loadFileData = this.loadFileData.bind(this);
+        this.updateFormData = this.updateFormData.bind(this);
     }
 
     componentDidMount() {
@@ -77,50 +110,41 @@ class CreateSermon extends Component<Props, State> {
         axios.get(this.props.seriesAPIURI)
         .then(res => {
             const serieses = res.data;
-            this.setState({ serieses: serieses, loadingSeries: false });
+            this.setState({ serieses: serieses});
         }).catch(error => {
-            this.setState({state: UploadState.ErrorLoadingFormData})
+            this.setState({errorLoadingFormData: true})
+        }).finally( () => {
+            this.setState({loadingSeries: false });
         })
 
         this.setState({loadingSpeakers:true})
         axios.get(this.props.speakersAPIURI)
         .then(res => {
             const speakers = res.data;
-            this.setState({ speakers: speakers, loadingSpeakers: false });
+            this.setState({ speakers: speakers});
         }).catch(error => {
-            this.setState({state: UploadState.ErrorLoadingFormData})
+            this.setState({errorLoadingFormData: true})
+        }).finally( () => {
+            this.setState({loadingSpeakers: false });
         })
 
         this.setState({loadingEvents:true})
         axios.get(this.props.eventsAPIURL)
         .then(res => {
             const events = res.data;
-            this.setState({ events: events, loadingEvents: false });
+            this.setState({ events: events});
         }).catch(error => {
-            this.setState({state: UploadState.ErrorLoadingFormData})
+            this.setState({errorLoadingFormData: true})
+        }).finally( () => {
+            this.setState({loadingEvents: false });
         })
     }
-
-    isFormComplete(): boolean {
-        const isFormIncomplete = isUndefined(this.state.name) || 
-            isUndefined(this.state.eventId) || 
-            isUndefined(this.state.passage) || 
-            isUndefined(this.state.speakerId) ||
-            isUndefined(this.state.seriesId) ||
-            isUndefined(this.state.eventId) ||
-            isUndefined(this.state.file);
-        if (isFormIncomplete) this.setState({state: UploadState.FormNotComplete})
-        else this.setState({state: UploadState.FormComplete})
-
-        return !isFormIncomplete;
-    }
-    
 
     handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         console.log(event.target);
 
-         if (this.isFormComplete) {
+         if (isFormComplete(this.state.formData)) {
 
             let config = {
                 headers: {
@@ -130,7 +154,7 @@ class CreateSermon extends Component<Props, State> {
             }
 
             
-            axios.post(this.props.sermonUploadUrlAPIURL, this.state.name, config)
+            axios.post(this.props.sermonUploadUrlAPIURL, this.state.formData.name, config)
             .then(res => {
                 console.log(res);
                 this.setState({ signedUploadURL: res.data.signedUploadUrl });
@@ -146,8 +170,8 @@ class CreateSermon extends Component<Props, State> {
 
     loadFileData() {
         fileReader.onloadend = this.uploadSermon
-        if (this.state.file) {
-            fileReader.readAsBinaryString(this.state.file)
+        if (this.state.formData.file) {
+            fileReader.readAsBinaryString(this.state.formData.file)
         }
     }
 
@@ -170,13 +194,13 @@ class CreateSermon extends Component<Props, State> {
     }
 
     createSermon() {
-        if (this.isFormComplete && this.state.signedUploadURL) {
+        if (isFormComplete(this.state.formData) && this.state.signedUploadURL) {
             var newSermon: Sermon = {
-                name: this.state.name!,
-                passage: this.state.passage!,
-                event: {id: this.state.eventId!},
-                series: {id: this.state.seriesId!},
-                speakers: [{id: this.state.speakerId!}],
+                name: this.state.formData.name!,
+                passage: this.state.formData.passage!,
+                event: {id: this.state.formData.eventId!},
+                series: {id: this.state.formData.seriesId!},
+                speakers: [{id: this.state.formData.speakerId!}],
                 url: this.state.signedUploadURL.split('?')[0],
                 duration: 0,
                 preachedAt: new Date()
@@ -191,13 +215,18 @@ class CreateSermon extends Component<Props, State> {
         }
     }
 
+    updateFormData(key: string, value: any) {
+        console.log("Updating: "+ key);
+        this.setState({...this.state, formData: {...this.state.formData, [key]: value}})
+    }
+
     render() {
 
         const eventOptionElements = this.state.events.map(event => <option key={event.id} value={event.id}>{event.name}</option>)
         const speakerOptionsElements = this.state.speakers.map(speaker => <option key={speaker.id}  value={speaker.id}>{speaker.name}</option>)
         const seriesOptionsElements = this.state.serieses.map(series => <option key={series.id} value={series.id}>{series.name}</option>)
 
-        if (this.state.state == UploadState.ErrorLoadingFormData) {
+        if (this.state.errorLoadingFormData) {
             return(<div>Error Creating Form</div>)
         }
 
@@ -224,29 +253,37 @@ class CreateSermon extends Component<Props, State> {
                 <form onSubmit={this.handleSubmit}>
                     <div>
                         <label>Title:</label>
-                        <input name="name" id="name" type="text" onChange={e => this.setState({...this.state, [e.currentTarget.name]: e.currentTarget.value})}/>
+                        <input name="name" id="name" type="text" onChange={e => this.updateFormData(e.currentTarget.name, e.currentTarget.value)}/>
                     </div>
                     <div>
                     <label>Series:</label>
-                    <select name="seriesId" id="series" onChange={e => this.setState({...this.state, [e.currentTarget.name]: e.currentTarget.value})}>
+                    <select name="seriesId" id="series" onChange={e => this.updateFormData(e.currentTarget.name, e.currentTarget.value)}>
                         {seriesOptionsElements}
                     </select>
                     </div>
                     <div>
                     <label>Passage:</label>
-                    <input name="passage" id="passage" type="text" onChange={e => this.setState({...this.state, [e.currentTarget.name]: e.currentTarget.value})}/>
+                    <input name="passage" id="passage" type="text" onChange={e => this.updateFormData(e.currentTarget.name, e.currentTarget.value)}/>
                     </div>
                     <div>
                     <label>Speaker:</label>
-                    <select name="speakerId" id="speaker" onChange={e => this.setState({...this.state, [e.currentTarget.name]: e.currentTarget.value})}>
+                    <select name="speakerId" id="speaker" onChange={e => this.updateFormData(e.currentTarget.name, e.currentTarget.value)}>
                         {speakerOptionsElements}
                     </select>
                     </div>
                     <div>
                     <label>Service/Event</label>
-                    <select name="eventId" id="event" onChange={e => this.setState({...this.state, [e.currentTarget.name]: e.currentTarget.value})}>
+                    <select name="eventId" id="event" onChange={e => this.updateFormData(e.currentTarget.name, e.currentTarget.value)}>
                         {eventOptionElements}
                     </select>
+                    </div>
+                    <div>
+                    <label>Date</label>
+                    <input name="date" id="date" type="text" onChange={e => this.updateFormData(e.currentTarget.name, e.currentTarget.value)}/>
+                    </div>
+                    <div>
+                    <label>Time</label>
+                    <input name="time" id="time" type="text" onChange={e => this.updateFormData(e.currentTarget.name, e.currentTarget.value)}/>
                     </div>
                     <div>
                     <label>MP3 File</label>
@@ -256,16 +293,23 @@ class CreateSermon extends Component<Props, State> {
                         onChange={e => {
                             console.log(e.currentTarget.files)
                             if (e.currentTarget != null && e.currentTarget.files != null && e.currentTarget.files[0] != null) {
-                                this.setState({...this.state, [e.currentTarget.name]: e.currentTarget.files[0]})
+                                this.updateFormData(e.currentTarget.name, e.currentTarget.files[0])
                             }
-                            }
+                        }
                         }
                         >
                     </input>
                     </div>
                     <div>
-                    <input type="submit" disabled={this.state.state === UploadState.FormComplete}/>
+                    <input type="submit" disabled={! isFormComplete(this.state.formData)}/>
                     </div>
+                    <div>{this.state.formData.name}</div>
+                    <div>{this.state.formData.seriesId}</div>
+                    <div>{this.state.formData.passage}</div>
+                    <div>{this.state.formData.eventId}</div>
+                    <div>{this.state.formData.speakerId}</div>
+                    <div>{this.state.formData.date}</div>
+                    <div>{this.state.formData.time}</div>
                 </form>
             </div>
         )

@@ -87,7 +87,7 @@ class App extends Component<Props,State> {
         <div className="github state"><GithubUserInfo githubToken={this.getGithubToken}></GithubUserInfo></div>
         <main>
             <Route path="/" exact={true} component={() => <SermonList sermonAPIURL={sermonAPIURL}></SermonList>}  />
-            <Route path="/series" exact={true} component={() => <SeriesList sermonAPIURL={sermonAPIURL}></SeriesList>}  />
+            <Route path="/series" exact={true} component={() => <SeriesList seriesAPIURL={seriesAPIURL}></SeriesList>}  />
             <Route path="/create" exact={true} component={() => <CreateSermon getGithubToken={this.getGithubToken} sermonAPIURL={sermonAPIURL} seriesAPIURI={seriesAPIURL} speakersAPIURI={speakersAPIURL} eventsAPIURL={eventsAPIURL} sermonUploadUrlAPIURL={uploadAPIURL}></CreateSermon>}  />
         </main>
         <footer>

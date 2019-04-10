@@ -13,7 +13,7 @@ export type Series = {
     id: string
     name?: string
     subtitle?: string,
-    image3x2url?: string
+    image3x2Url?: string
 }
 
 export type Sermon = {

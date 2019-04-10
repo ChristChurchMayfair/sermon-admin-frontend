@@ -2,9 +2,10 @@ import React, {Component} from 'react';
 import axios from 'axios';
 import {Series} from '../SermonType'
 import SeriesView from './SeriesView';
+import './SeriesList.css'
 
 type Props = {
-    sermonAPIURL: string
+    seriesAPIURL: string
 }
 type State = {
     serieses: Series[]
@@ -20,7 +21,7 @@ class SeriesList extends Component<Props,State> {
 
     componentDidMount() {
         this.setState({loading:true})
-        axios.get(this.props.sermonAPIURL)
+        axios.get(this.props.seriesAPIURL)
           .then(res => {
             const serieses = res.data;
             this.setState({ serieses: serieses, loading: false });
