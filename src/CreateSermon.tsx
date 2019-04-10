@@ -146,13 +146,19 @@ class CreateSermon extends Component<Props, State> {
 
          if (isFormComplete(this.state.formData)) {
 
+            const githubToken = this.props.getGithubToken()
+
+            if (isUndefined(githubToken)) {
+                alert("You are not logged in.")
+                return
+            }
+
             let config = {
                 headers: {
                   "Content-Type": "text/plain",
                   "Authorization": "github " + this.props.getGithubToken()
                 }
             }
-
             
             axios.post(this.props.sermonUploadUrlAPIURL, this.state.formData.name, config)
             .then(res => {
@@ -208,7 +214,14 @@ class CreateSermon extends Component<Props, State> {
 
             this.setState({state: UploadState.CreatingSermon});
 
-            axios.post(this.props.sermonAPIURL, newSermon)
+            let config = {
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": "github " + this.props.getGithubToken()
+                }
+            }
+
+            axios.post(this.props.sermonAPIURL, newSermon, config)
             .then(res => {
                 this.setState({state: UploadState.Done})
             })
