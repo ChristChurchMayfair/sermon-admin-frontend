@@ -6,7 +6,7 @@ type Props = {
     width: number
     onCode: (code: string, stateMatched: boolean, state: string) => any
     onClose: () => any
-    client_id: string
+    client_id?: string
     allow_signup: false
     scope: string
 }

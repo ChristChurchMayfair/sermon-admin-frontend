@@ -14,6 +14,8 @@ if (process.env.REACT_APP_SERMON_API_BASE) {
   sermon_api_base = process.env.REACT_APP_SERMON_API_BASE
 }
 
+var githubClientId = process.env.REACT_APP_GITHUB_CLIENT_ID
+
 const sermonAPIURL = sermon_api_base + "/sermons";
 const seriesAPIURL = sermon_api_base + "/series";
 const speakersAPIURL = sermon_api_base + "/speakers";
@@ -82,7 +84,7 @@ class App extends Component<Props,State> {
         <Link to="/events">Speakers</Link>
         <Link to="/events">Events</Link>
         </div>
-        <div className="github login"><GithubLogin onCode={this.onCode} onClose={onClose} height={500} width={500} client_id="13781417cd1a751db388" allow_signup={false} scope="user,read:org"></GithubLogin></div>
+        <div className="github login"><GithubLogin onCode={this.onCode} onClose={onClose} height={500} width={500} client_id={githubClientId} allow_signup={false} scope="user,read:org"></GithubLogin></div>
         </header>
         <div className="github state"><GithubUserInfo githubToken={this.getGithubToken}></GithubUserInfo></div>
         <main>
